@@ -1,39 +1,169 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.ServoImpl;
 
-public final class ArmClass extends LinearOpMode {
-    public void runOpMode() {} //oly for linear opMode
+import java.util.NoSuchElementException;
+
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.*;
+
+public final class ArmClass {
+
+    public static DcMotor liftMotor;
+    public static ServoImpl armServo, clawServo;
+
+    /**
+     * the number of encoder ticks it takes to fully extend the arm.
+     */
+    private static final int LIFT_RANGE = 2849; // + .81, double check if this is right
 
     private enum LiftTarget {
         JUNCTION,
         SHORT,
         MEDIUM,
         TALL;
+
+        /**
+         * iterator for enum
+         */
+        public LiftTarget next() {
+
+            if (ordinal() == values().length - 1){
+
+                throw new NoSuchElementException();
+
+            }
+
+            return values()[ordinal() + 1];
+
+        }
+
+        public LiftTarget prev() {
+
+            if (ordinal() == 0){
+
+                throw new NoSuchElementException();
+
+            }
+
+            return values()[ordinal() - 1];
+
+        }
     }
 
-    private final int LIFT_RANGE = 2849; // + .81, double check if this is right
-
-    public static DcMotor liftMotor;
-    public static ServoImpl armServo, clawServo;
+    static LiftTarget curentLiftTarget = LiftTarget.JUNCTION;
 
     public int getLIFT_RANGE() {
         return LIFT_RANGE;
     }
 
-    public void initArm () {
+    /**
+     * initialises all the arm hardware
+     */
+    public static void init() {
 
+        //init lift motor
         liftMotor = hardwareMap.dcMotor.get("arm_motor"); //312 rpm motor
+        liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         liftMotor.setTargetPosition(0);
         liftMotor.setMode( DcMotor.RunMode.RUN_TO_POSITION );
 
+        telemetry.addData("Lift motor", "initialized");
+        telemetry.update();
+
+        //init servos
         armServo = (ServoImpl) hardwareMap.servo.get("arm_servo");
         clawServo = (ServoImpl) hardwareMap.servo.get("claw_servo");
+        telemetry.addData("Arm servos", "initialized");
+        telemetry.update();
+
+        telemetry.addData("Arm init", "done");
+        telemetry.update();
+
     }
 
-    public void turnArm () {
+    /**
+     * Run during loop phase to run arm.
+     * Dpad controls arm height and bumpers control arm turning and claw.
+     */
+    public static void loop(Gamepad gamepad) {
+
+        //dpad controls height
+        if (gamepad.dpad_up){
+            runLift( LiftTarget.TALL );
+        }
+
+        if (gamepad.dpad_left) {
+
+            try {
+
+                runLift( curentLiftTarget.prev() );
+
+            }
+
+            catch (Exception e) {
+
+                telemetry.addData("Arm can't go lower", "");
+                telemetry.update();
+
+            }
+
+        }
+
+        if (gamepad.dpad_right) {
+
+            try {
+
+                runLift( curentLiftTarget.next() );
+
+            }
+
+            catch (Exception e) {
+
+                telemetry.addData("Arm can't go higher", "");
+                telemetry.update();
+
+            }
+
+        }
+
+        if (gamepad.dpad_down) {
+
+            runLift( LiftTarget.JUNCTION );
+
+        }
+
+        if ( gamepad.left_bumper ) {
+
+            turnArm();
+
+        }
+
+        if (gamepad.right_bumper) {
+
+            runClaw();
+
+        }
+
+    }
+
+    /**
+     * this is to reset arm
+     */
+    public static void stop() {
+
+        armServo.setPosition(0);
+        clawServo.setPosition(0);
+
+        liftMotor.setTargetPosition(0);
+    }
+
+
+    /**
+     * rotates arm 180 degrees
+     */
+    public static void turnArm () {
 
         if( armServo.getPosition() == 0.0 ) {
             armServo.setPosition(1);
@@ -49,13 +179,20 @@ public final class ArmClass extends LinearOpMode {
 
     }
 
-    public void turnArm (int degrees) {
+    /**
+     * rotates arm "degrees" degrees
+     * @param degrees
+     */
+    public static void turnArm (int degrees) {
 
         armServo.setPosition( Math.min( Math.max( armServo.getPosition() + degrees, 0 ), 1 ) );
 
     }
 
-    public void runClaw () {
+    /**
+     * toggles claw (open to cosed & vice versa)
+     */
+    public static void runClaw () {
         if( clawServo.getPosition() == 0 ) {
             clawServo.setPosition(1);
         }
@@ -65,9 +202,16 @@ public final class ArmClass extends LinearOpMode {
         }
     }
 
-    public void runLift (LiftTarget liftTarget) {
+    /**
+     * will raise arm to height specified by input
+     * @param liftTarget
+     */
+    public static void runLift (LiftTarget liftTarget) {
 
-        switch (liftTarget) { //swap 33.5 with max arm hight
+        curentLiftTarget = liftTarget;
+
+        switch (liftTarget) { //swap 33.5 with max arm height
+
             case JUNCTION:
                 liftMotor.setTargetPosition(0);
                 break;
@@ -90,37 +234,27 @@ public final class ArmClass extends LinearOpMode {
 
     }
 
-    public void runLift (int inches) {
-        liftMotor.setTargetPosition( LIFT_RANGE * inches / 47 );
-    } //meed to lessen 47
-
-    public void grabCone ( int coneHight ) {
-
-        if (armServo.getPosition() != 0) {
-            turnArm();
-        }
-
-        runLift(coneHight);
-
-        runClaw();
-
-    }
-
-    public void grabCone () {
+    /**
+     * will grab cone from back. bot must be aligned
+     */
+    public static void grabCone () {
 
         if (armServo.getPosition() != 0) {
             turnArm();
         }
 
-        runLift(0);
+        runLift(LiftTarget.JUNCTION);
 
         runClaw();
 
     }
 
 
-
-    public void dropCone (LiftTarget liftTarget) {
+    /**
+     * will raise arm to height specified, rotate arm, and deposit cone
+     * @param liftTarget
+     */
+    public static void dropCone (LiftTarget liftTarget) {
 
         runLift(liftTarget);
 
@@ -129,7 +263,12 @@ public final class ArmClass extends LinearOpMode {
         runClaw();
     }
 
-    public void dropCone (LiftTarget liftTarget, int degrees) {
+    /**
+     * will raise arm to height specified, rotate arm degrees specified, and deposit cone
+     * @param liftTarget
+     * @param degrees
+     */
+    public static void dropCone (LiftTarget liftTarget, int degrees) {
 
         runLift(liftTarget);
 

@@ -13,20 +13,30 @@ public class TeleOpV2 extends OpMode {
     public void init() {
 
         MechDrive.init();
-
-    }
-
-    @Override
-    public void start() {
-
-        MechDrive.start();
+        ArmClass.init();
 
     }
 
     @Override
     public void loop() {
 
+        ArmClass.loop(gamepad1);
         MechDrive.loop();
+
+        //a faster way to stop opmode
+        if (gamepad1.guide || gamepad2.guide) {
+
+            terminateOpModeNow();
+
+        }
+
+    }
+
+    @Override
+    public void stop() {
+
+        ArmClass.stop();
+        MechDrive.stop();
 
     }
 
