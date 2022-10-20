@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.*;
 
 /**
- * this turns Pranav's mechanum drive into a class that can be implemented in any opMode
+ * this turns most of Pranav's mechanum drive into a class that can be implemented in any opMode
  */
 public final class MechDrive {
 

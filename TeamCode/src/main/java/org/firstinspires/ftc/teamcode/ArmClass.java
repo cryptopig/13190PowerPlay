@@ -10,15 +10,22 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.*;
 
 public final class ArmClass {
 
+  //data section
+
     public static DcMotor liftMotor;
     public static ServoImpl armServo, clawServo;
 
+    //needs to be tweaked
     /**
      * the number of encoder ticks it takes to fully extend the arm.
      */
     private static final int LIFT_RANGE = 2849; // + .81, double check if this is right
 
+    /**
+     * the location that our arm is extended too
+     */
     private enum LiftTarget {
+
         JUNCTION,
         SHORT,
         MEDIUM,
@@ -50,13 +57,12 @@ public final class ArmClass {
             return values()[ordinal() - 1];
 
         }
+
     }
 
     static LiftTarget curentLiftTarget = LiftTarget.JUNCTION;
 
-    public int getLIFT_RANGE() {
-        return LIFT_RANGE;
-    }
+  //TeleOp Functions
 
     /**
      * initialises all the arm hardware
@@ -159,6 +165,11 @@ public final class ArmClass {
         liftMotor.setTargetPosition(0);
     }
 
+  //the function section
+
+    public int getLIFT_RANGE() {
+        return LIFT_RANGE;
+    }
 
     /**
      * rotates arm 180 degrees

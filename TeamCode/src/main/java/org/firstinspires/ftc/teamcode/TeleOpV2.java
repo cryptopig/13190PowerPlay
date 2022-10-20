@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 /**
  * an opMode that tries the MechDrive and ArmClass classes
  */
-@TeleOp
+@TeleOp(name = "Prateek OpMode 2")
 public class TeleOpV2 extends OpMode {
 
     @Override

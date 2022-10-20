@@ -4,7 +4,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.ServoImpl;
 
-
+//kinda outdated
 public final class Funcs  {
 
     public static ServoImpl armServo, clawServo; // will hve to initialise these in a separate init
@@ -26,6 +26,7 @@ public final class Funcs  {
 
         if ( armServo.getPosition() < .1 ) {
             armServo.setPosition(1);
+
             return 0;
         }
 
