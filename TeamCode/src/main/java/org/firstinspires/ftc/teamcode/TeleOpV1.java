@@ -10,7 +10,7 @@ import static org.firstinspires.ftc.teamcode.Funcs.armServo;
 import static org.firstinspires.ftc.teamcode.Funcs.clawServo;
 
 //is a one-gamepad TeleOp
-@TeleOp
+@TeleOp(group = "outdated")
 public class TeleOpV1 extends OpMode {
 
     DcMotor lf, lb, rf, rb;
