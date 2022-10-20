@@ -1,2 +1,10 @@
 include ':FtcRobotController'
 include ':TeamCode'
+include 'TeamCode:MeepMeepRRTesting'
+findProject(':TeamCode:MeepMeepRRTesting')?.name = 'MeepMeepRRTesting'
+include 'FtcRobotController:MeepMeepRRTester'
+findProject(':FtcRobotController:MeepMeepRRTester')?.name = 'MeepMeepRRTester'
+include 'FtcRobotController:MeepMeepRRTester'
+findProject(':FtcRobotController:MeepMeepRRTester')?.name = 'MeepMeepRRTester'
+include 'MeepMeep'
+
