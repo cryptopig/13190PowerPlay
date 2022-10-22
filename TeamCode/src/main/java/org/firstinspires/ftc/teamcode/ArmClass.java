@@ -4,8 +4,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.ServoImpl;
 
-import java.util.NoSuchElementException;
-
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.*;
 
 public final class ArmClass {
@@ -24,7 +22,7 @@ public final class ArmClass {
     /**
      * the location that our arm is extended too
      */
-    private enum LiftTarget {
+    public enum LiftTarget {
 
         JUNCTION,
         SHORT,
@@ -36,9 +34,10 @@ public final class ArmClass {
          */
         public LiftTarget next() {
 
-            if (ordinal() == values().length - 1){
+            if ( this == TALL ){
 
-                throw new NoSuchElementException();
+                //return TALL;
+                return JUNCTION;
 
             }
 
@@ -48,9 +47,10 @@ public final class ArmClass {
 
         public LiftTarget prev() {
 
-            if (ordinal() == 0){
+            if (this == JUNCTION){
 
-                throw new NoSuchElementException();
+                //return JUNCTION;
+                return TALL;
 
             }
 
@@ -70,7 +70,7 @@ public final class ArmClass {
     public static void init() {
 
         //init lift motor
-        liftMotor = hardwareMap.dcMotor.get("arm_motor"); //312 rpm motor
+        liftMotor = hardwareMap.dcMotor.get("arm_motor"); //512 rpm motor
         liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         liftMotor.setTargetPosition(0);
         liftMotor.setMode( DcMotor.RunMode.RUN_TO_POSITION );
@@ -95,42 +95,20 @@ public final class ArmClass {
      */
     public static void loop(Gamepad gamepad) {
 
-        //dpad controls height
+        //dpad controls height. up/down for top/bottom and left/right for cycling
         if (gamepad.dpad_up){
             runLift( LiftTarget.TALL );
         }
 
         if (gamepad.dpad_left) {
 
-            try {
-
-                runLift( curentLiftTarget.prev() );
-
-            }
-
-            catch (Exception e) {
-
-                telemetry.addData("Arm can't go lower", "");
-                telemetry.update();
-
-            }
+            runLift( curentLiftTarget.prev() );
 
         }
 
         if (gamepad.dpad_right) {
 
-            try {
-
-                runLift( curentLiftTarget.next() );
-
-            }
-
-            catch (Exception e) {
-
-                telemetry.addData("Arm can't go higher", "");
-                telemetry.update();
-
-            }
+            runLift( curentLiftTarget.next() );
 
         }
 
@@ -140,7 +118,7 @@ public final class ArmClass {
 
         }
 
-        if ( gamepad.left_bumper ) {
+        if (gamepad.left_bumper) {
 
             turnArm();
 
@@ -152,6 +130,9 @@ public final class ArmClass {
 
         }
 
+        telemetry.addData( "Arm target", curentLiftTarget.name() );
+        telemetry.update();
+
     }
 
     /**
@@ -159,10 +140,17 @@ public final class ArmClass {
      */
     public static void stop() {
 
+        telemetry.addData("Stopping OpMode", "");
+        telemetry.update();
+
         armServo.setPosition(0);
         clawServo.setPosition(0);
 
         liftMotor.setTargetPosition(0);
+
+        telemetry.addData("OpMode", "done");
+        telemetry.update();
+
     }
 
   //the function section

@@ -17,9 +17,18 @@ public final class MechDrive {
     public static void init() {
 
         lf = hardwareMap.dcMotor.get("lf");
-        rf = hardwareMap.dcMotor.get("rf");
         lb = hardwareMap.dcMotor.get("lb");
+        rf = hardwareMap.dcMotor.get("rf");
         rb = hardwareMap.dcMotor.get("rb");
+
+        lf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        //left side might need to be swapped
+        lf.setDirection(DcMotor.Direction.REVERSE);
+        lb.setDirection(DcMotor.Direction.REVERSE);
 
         lf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -35,6 +44,7 @@ public final class MechDrive {
         telemetry.update();
 
         telemetry.addData("Drive init", "done");
+        telemetry.update();
 
     }
 
@@ -44,18 +54,37 @@ public final class MechDrive {
      */
     public static void loop() {
 
-        double vertical, horizontal, pivot;
+        double px = gamepad1.left_stick_x;
+        double py = -gamepad1.left_stick_y;
+        double pa = gamepad1.right_stick_y;
 
-        //take gamepad input
-        vertical = gamepad1.left_stick_y;
-        horizontal = gamepad1.left_stick_x;
-        pivot = gamepad1.right_stick_x;
+        if (Math.abs(pa) < 0.05) pa = 0;
 
-        //use gamepad input
-        lf.setPower(pivot + (-horizontal - vertical));
-        rf.setPower(pivot + (horizontal - vertical));
-        lb.setPower(pivot + (horizontal - vertical));
-        rb.setPower(pivot + (-horizontal - vertical));
+        double p1 = px + py + pa;
+        double p2 = -px + py - pa;
+        double p3 = -px + py - pa;
+        double p4 = px + py + pa;
+
+        double max = Math.max(1.0, Math.abs(p2));
+        max = Math.max(max, Math.abs(p1));
+        max = Math.max(max, Math.abs(p3));
+        max = Math.max(max, Math.abs(p4));
+
+        p2 /= max;
+        p1 /= max;
+        p3 /= max;
+        p4 /= max;
+
+        lf.setPower(p1);
+        lb.setPower(p2);
+        rf.setPower(p3);
+        rb.setPower(p4);
+
+        telemetry.addData("lf power", lf::getPower);
+        telemetry.addData("lb power", lb::getPower);
+        telemetry.addData("rf power", rf::getPower);
+        telemetry.addData("rb power", rb::getPower);
+        telemetry.update();
 
     }
 
