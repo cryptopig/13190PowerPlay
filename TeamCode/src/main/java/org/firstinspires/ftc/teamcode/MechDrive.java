@@ -48,7 +48,6 @@ public final class MechDrive {
 
     }
 
-
     /**
      * call this in loop phase
      */
@@ -58,11 +57,9 @@ public final class MechDrive {
         double py = -gamepad1.left_stick_y;
         double pa = gamepad1.right_stick_y;
 
-        if (Math.abs(pa) < 0.05) pa = 0;
-
-        double p1 = px + py + pa;
+        double p1 = px + py - pa;
         double p2 = -px + py - pa;
-        double p3 = -px + py - pa;
+        double p3 = -px + py + pa;
         double p4 = px + py + pa;
 
         double max = Math.max(1.0, Math.abs(p2));
