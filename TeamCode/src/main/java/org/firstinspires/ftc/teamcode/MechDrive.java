@@ -1,26 +1,30 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Gamepad;
+
+import java.util.function.DoubleSupplier;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.*;
 
 /**
  * this turns most of Pranav's mechanum drive into a class that can be implemented in any opMode
  */
-public final class MechDrive {
+public class MechDrive {
 
-    public static DcMotor lf, rf, lb, rb;
+    private DcMotor lf, rf, lb, rb;
+
+    public MechDrive(DcMotor lf, DcMotor rf, DcMotor lb, DcMotor rb){
+        this.lf = lf;
+        this.rf = rf;
+        this.lb = lb;
+        this.rb = rb;
+    }
 
     /**
      * call this in init phase
      */
-    public static void init() {
-
-        lf = hardwareMap.dcMotor.get("lf");
-        lb = hardwareMap.dcMotor.get("lb");
-        rf = hardwareMap.dcMotor.get("rf");
-        rb = hardwareMap.dcMotor.get("rb");
-
+    public void init() {
         lf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -40,22 +44,12 @@ public final class MechDrive {
         rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        telemetry.addData("Motors", "initialized");
-        telemetry.update();
-
-        telemetry.addData("Drive init", "done");
-        telemetry.update();
-
     }
 
     /**
      * call this in loop phase
      */
-    public static void loop() {
-
-        double px = gamepad1.left_stick_x;
-        double py = -gamepad1.left_stick_y;
-        double pa = gamepad1.right_stick_y;
+    public void drive(double px, double py, double pa) {
 
         double p1 = px + py - pa;
         double p2 = -px + py - pa;
@@ -76,25 +70,23 @@ public final class MechDrive {
         lb.setPower(p2);
         rf.setPower(p3);
         rb.setPower(p4);
-
-        telemetry.addData("lf power", lf::getPower);
-        telemetry.addData("lb power", lb::getPower);
-        telemetry.addData("rf power", rf::getPower);
-        telemetry.addData("rb power", rb::getPower);
-        telemetry.update();
-
     }
 
     /**
      * this is to reset motors. call in stop section
      */
-    public static void stop() {
-
+    public void stop() {
         lf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
 
+    public void brake(){
+        lf.setPower(0);
+        lb.setPower(0);
+        rf.setPower(0);
+        rb.setPower(0);
     }
 
 }

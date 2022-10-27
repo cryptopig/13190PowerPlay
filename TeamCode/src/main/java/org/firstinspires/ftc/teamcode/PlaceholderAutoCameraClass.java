@@ -6,23 +6,28 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
+
+//TODO: fix format
 public final class PlaceholderAutoCameraClass {
 
-    public static int parkPos = 0; //actuall position will be 1, 2, or 3.
+    public static char parkPos = 0; //actuall position will be 1, 2, or 3.
 
     private static SampleMecanumDrive drive_;
 
-    public static void init(SampleMecanumDrive drive) {
+    private TFConeScanner coneScanner;
+
+    public  void init(SampleMecanumDrive drive) {
         drive_ = drive;
+
+        coneScanner.init();
 
         telemetry.addData("camera init", "done");
         telemetry.update();
     }
 
-    //TODO: add actual camera functionality to this
-    //TODO: make backup functionality for generic sleeves (in case we forget ours)
+
     /**
-     * will read cone and determine parking spot
+     * will read cone and determine parking spot.
      */
     public static void setParkPos () {
 
@@ -38,8 +43,9 @@ public final class PlaceholderAutoCameraClass {
 
     }
 
+    //TODO: line up cases with actual outputs
     /**
-     * will run bot to parking spot or terminal if any problems
+     * will run bot to parking spot or terminal if any problems. only call in loop phase
      * @param startPos
      */
     public static void park (com.acmerobotics.roadrunner.geometry.Pose2d startPos) {
@@ -50,7 +56,7 @@ public final class PlaceholderAutoCameraClass {
 
         switch (parkPos) {
 
-            case 1:
+            case 'B':
                 TrajectorySequence toL1 = drive_.trajectorySequenceBuilder( startPos )
                         .lineTo( new Vector2d( (-35 * modX) - (25 * modY), startPos.getY() * modY ) )
                         .lineTo( new Vector2d( (-35 * modX) - (25 * modY), -23 * modY) )
@@ -62,7 +68,7 @@ public final class PlaceholderAutoCameraClass {
                 drive_.followTrajectorySequence(toL1);
                 break;
 
-            case 2:
+            case 'C':
                 TrajectorySequence toL2 = drive_.trajectorySequenceBuilder( startPos )
                         .lineTo( new Vector2d( -34 * modX, startPos.getY() ) )
                         .lineTo( new Vector2d( -34 * modX, -23 * modY ) )
@@ -74,7 +80,7 @@ public final class PlaceholderAutoCameraClass {
                 drive_.followTrajectorySequence(toL2);
                 break;
 
-            case 3:
+            case 'D':
                 TrajectorySequence toL3 = drive_.trajectorySequenceBuilder( startPos )
                         .lineTo( new Vector2d( (-35 * modX) + (25 * modY), startPos.getY() * modY ) )
                         .lineTo( new Vector2d( (-35 * modX) + (25 * modY), -23 * modY) )
@@ -86,8 +92,9 @@ public final class PlaceholderAutoCameraClass {
                 drive_.followTrajectorySequence(toL3);
                 break;
 
+            case 'A': //no break so these will merge
             default: //if somehow parkPos is an unexpected value, robot will park in terminal
-                TrajectorySequence toTerminal = drive_.trajectorySequenceBuilder( startPos )
+                TrajectorySequence toTerminal2 = drive_.trajectorySequenceBuilder( startPos )
                         .lineTo( new Vector2d(-60, -11 * modY ) )
                         .strafeRight(50 * modY )
                         .build();
@@ -96,7 +103,7 @@ public final class PlaceholderAutoCameraClass {
                 telemetry.addData("parkPos is", parkPos );
                 telemetry.update();
 
-                drive_.followTrajectorySequence( toTerminal );
+                drive_.followTrajectorySequence( toTerminal2 );
                 break;
 
         }
