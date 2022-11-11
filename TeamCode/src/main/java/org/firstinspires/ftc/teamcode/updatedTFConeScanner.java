@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
@@ -142,42 +141,40 @@ public class TFConeScanner extends LinearOpMode {
                     // the last time that call was made.
                     List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                     if (updatedRecognitions != null) {
-                        telemetry.addData("# Object Detected", updatedRecognitions.size());
-                        // step through the list of recognitions and display boundary info.
-
                         Recognition currentRecognition = updatedRecognitions.get(0);
+                        telemetry.addData("# Object Detected", updatedRecognitions.size());
+
 
                         for (int i = 0; i < updatedRecognitions.size(); i++) {
                             Recognition recognition = updatedRecognitions.get(i);
-                            if (currentRecognition.getConfidence() > recognition.getConfidence()) {
+                            if (currentRecognition.getConfidence() < recognition.getConfidence()) {
                                 currentRecognition = recognition;
-
                             }
-
-                        if (currentRecognition.getConfidence() > .9) {
-
-                            recognitions.add(currentRecognition);
-
                         }
+                        // step through the list of recognitions and display boundary info.
 
-                        }
 //                        for (Recognition recognition : updatedRecognitions) {
-////                            telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
-////                            telemetry.addData(String.format("  left,top (%d)", i), "%.03f , %.03f",
-////                                    recognition.getLeft(), recognition.getTop());
-////                            telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",
-////                                    recognition.getRight(), recognition.getBottom());
-//                            //attempt to invoke float ...tfod.recognition.CurrentRecognition.getconfidence(
+//                            telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
+//                            telemetry.addData(String.format("  left,top (%d)", i), "%.03f , %.03f",
+//                                    recognition.getLeft(), recognition.getTop());
+//                            telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",
+//                                    recognition.getRight(), recognition.getBottom());
+
+
+                            //get the most confident output from the recognised numbers this pass
+//                            if (currentRecognition.getConfidence() <= recognition.getConfidence() || currentRecognition == null) {
 //
-//                            //get the most confident output from the recognised numbers this pass
-//                            if (currentRecognition.getConfidence() > recognition.getConfidence()) {
 //                                currentRecognition = recognition;
 //
 //                            }
 //                        }
 
                         //if most certain output not more certain than a set threshold, ignore
+                        if (currentRecognition.getConfidence() > .9) {
 
+                            recognitions.add(currentRecognition);
+
+                        }
 //                        telemetry.update();
                     }
                 }
@@ -255,7 +252,7 @@ public class TFConeScanner extends LinearOpMode {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfodParameters.minResultConfidence = 0.8f;
+        tfodParameters.minResultConfidence = 0.9f;
         tfodParameters.isModelTensorFlow2 = true;
         tfodParameters.inputSize = 320;
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
